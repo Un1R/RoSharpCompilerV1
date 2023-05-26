@@ -201,6 +201,75 @@ local AllMethods = {
 	":addobject"
 }
 
+local FindVariable = function(nam)
+	for i,v in ipairs(Lines:GetChildren()) do
+		if v:IsA("Frame") then
+			if string.find(string.lower(v.Content.Text),'def') then
+				local split = ToLettersTable(v.Content.Text)
+				local mark1 = nil;
+				local mark2 = nil;
+				print("Passed")
+				for i,v in ipairs(split) do
+					if v == " " then
+						table.remove(split,i)
+					end
+				end
+				
+				table.remove(split,1)
+				table.remove(split,1)
+				table.remove(split,1)
+				table.remove(split,1)
+				
+				local equalsindex = nil;
+				for i,v in ipairs(split) do
+					if v == "=" then
+						equalsindex = i
+						break
+					end
+				end
+				
+				local Left_ = equalsindex - 1
+				local varname = "";
+				local cura = 0;
+				repeat
+					cura += 1
+					task.wait()
+					varname = varname..split[Left_-cura]
+				until cura == Left_
+				print(varname)
+				
+				if string.lower(varname) == string.lower(nam) then
+					--// getting value
+
+					for y,x in split do
+						if x == '"' then
+							if mark1 == nil then
+								mark1 = y
+							elseif mark2 == nil then
+								mark2 = y
+							elseif mark1 ~= nil and mark2 ~= nil then
+								break
+							end
+						end
+					end
+
+					local Left = (mark2-mark1)-1
+					local curi = 0;
+					local Formed = "";
+					repeat
+						curi += 1
+						task.wait()
+						Formed = Formed..split[Left+curi]
+					until curi == Left
+					
+					return Formed
+				end
+				
+			end
+		end
+	end
+end
+
 local RemoveMarkdownAndGetInfoMethods = function(tab)
 	local ToRemove = {
 		"<font",
@@ -319,7 +388,7 @@ local GetRawArgument = function(s)
 		end
 	end
 	local curi = 0;
-	if one and two and three then
+	if two and three then
 		local Left = (three-two)-1
 		local Formed = "";
 		repeat
@@ -328,6 +397,44 @@ local GetRawArgument = function(s)
 			Formed = Formed..LTRS[two+curi]
 		until curi == Left
 		return Formed
+	elseif two == nil and three == nil then
+		local ky = false
+		local Formed = "";
+
+		if string.find(s,">") and string.find(s,"<") then
+			ky = true
+			local a_ = nil
+			local b_ = nil
+			for i,v in ipairs(LTRS) do
+				if v == ">"  then
+					a_ = i
+					break
+				end
+			end
+			for i,v in ipairs(LTRS) do
+				if v == "<" then
+					b_ = i
+					break
+				end
+			end
+
+			local Left = (b_-a_)-1
+			repeat
+				task.wait()
+				curi += 1
+				Formed = Formed..LTRS[a_+curi]
+			until curi == Left
+			return Formed
+		end
+		
+		local var = FindVariable(Formed)
+		print(var)
+		
+		if ky == true then
+			return Formed
+		else
+			return var
+		end
 	else
 		return ""
 	end
